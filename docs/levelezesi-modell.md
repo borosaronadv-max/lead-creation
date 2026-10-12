@@ -16,7 +16,15 @@ Hétköznap (H–P), Europe/Budapest időzóna, két futás:
 ## 1. Triázs (címkézés)
 
 Feldolgozandó: a beérkezett mappa szálai az utolsó 3 napból, amelyeken még nincs
-`Triázs/*` kategóriacímke (a saját küldött levelek, spam és kuka kizárva).
+`Triázs/*` kategóriacímke (a saját küldött levelek, spam és kuka kizárva):
+
+```
+in:inbox newer_than:3d -in:sent -label:triázs-ügyfél-mandátum -label:triázs-partner -label:triázs-admin -label:triázs-hírlevél
+```
+
+> Gmail-keresésben a címkét **névvel** kell megadni (`label:triázs-hírlevél`); az ID-vel
+> (`label:Label_127`) a keresés nem szűr. Címkézéshez (`label_thread`) viszont az ID kell.
+> Ezt az első tesztfutás (2026-10-12) derítette ki.
 
 Kategóriacímkék (szálanként pontosan egy):
 
@@ -24,7 +32,7 @@ Kategóriacímkék (szálanként pontosan egy):
 |---|---|---|
 | `Triázs/Ügyfél-mandátum` | `Label_124` | Ügyfél, megbízás, ajánlat, futó mandátum, tranzakció, delivery |
 | `Triázs/Partner` | `Label_125` | Alvállalkozók, szakmai partnerek, egyesületek (VOSZ, BÉT, ÓE stb.), együttműködők |
-| `Triázs/Admin` | `Label_126` | Számlák, könyvelés, hivatalos/hatósági levelek, HR, banki és rendszerértesítések |
+| `Triázs/Admin` | `Label_126` | Számlák, könyvelés, hivatalos/hatósági levelek, HR, bank, belső értekezlet-meghívók, iskola/család ügyintézés, rendszerértesítések |
 | `Triázs/Hírlevél` | `Label_127` | Hírlevelek, marketing, eseménymeghívók tömeges listáról, automatikus értesítők |
 
 Állapotcímkék (opcionálisak, több is lehet):
@@ -67,7 +75,11 @@ Feldolgozva: N szál (Ügyfél x · Partner y · Admin z · Hírlevél w)
 
 ⚖️ Döntésre vár
 - <feladó> – <tárgy> – mi a kérdés, javasolt opciók
+
+ℹ️ Tudnivaló (opcionális, max 3 sor; nem kell rá válasz)
 ```
 
 Üres szekció helyett „—”. A délutáni futás csak az új tételeket sorolja fel, plusz a
 reggel óta még nyitott sürgős tételeket.
+
+Jelszó, belépési adat és bankszámlaszám nem kerül az összefoglalóba.
