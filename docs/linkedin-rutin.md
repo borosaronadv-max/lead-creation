@@ -40,15 +40,15 @@ Drive-hozzáférés), a jelentés is ott jelenik meg.
 | Profilmegtekintések száma | Gmail: `from:linkedin.com subject:"profile is popular"` — „Your profile is popular - N people” | ritka, rendszertelen; a szám a LinkedIn szerinti utolsó 90 nap |
 | Profilmegtekintők nevei | csak a LinkedIn felületén | e-mailben nem jön; lásd 1. lépés |
 | Elfogadott meghívók | Gmail: `from:invitations@linkedin.com subject:accepted` | sikerességmérés |
-| Saját kapcsolatok | `Connections.csv` a LinkedIn adatexportból, Google Drive `LinkedIn/` mappa | Settings → Data privacy → Get a copy of your data → Connections |
-| Telefonkönyv | `contacts.csv` / `.vcf` Google Drive `LinkedIn/` mappa | Google Contacts → Export, vagy iPhone-ról vCard |
+| Saját kapcsolatok | `Connections.csv` a LinkedIn adatexportból, Google Drive `Linkedin/` mappa (feltöltve 2026-10-12, export: 10-05, 2 386 kapcsolat) | Settings → Data privacy → Get a copy of your data → Connections |
+| Telefonkönyv | `contacts.csv` / `.vcf` Google Drive `Linkedin/` mappa | Google Contacts → Export (Google CSV), vagy iPhone-ról vCard. **2026-10-12-én még hiányzik.** A `linkedin_connections_1005.xlsx` a kapcsolatok felől egyeztetett (1 157 kapcsolat van a címlistában), de a LinkedInen *nem* lévő telefonkönyv-bejegyzések csak a nyers exportból derülnek ki |
 | Adatnapló | `data/linkedin-stats.csv` ebben a repóban | minden futás hozzáírja az új értékeket és pusholja |
 
 ## 1. Profilmegtekintők (napi)
 
 A rutin a Gmailből nem tudja a neveket, ezért:
 
-1. Ha Áron a `LinkedIn/profilnezok.txt` Drive-fájlba bemásolja a
+1. Ha Áron a `Linkedin/profilnezok.txt` Drive-fájlba bemásolja a
    linkedin.com/me/profile-views oldal listáját (név, titulus — elég kijelölni és
    bemásolni), a rutin összeveti a `Connections.csv`-vel, és a **nem kapcsolatban
    lévőkre** meghívószöveget ír.
@@ -61,9 +61,12 @@ személy.
 
 ## 2. Telefonkönyv-egyeztetés (hétfő)
 
-1. Beolvassa a telefonkönyv-exportot és a `Connections.csv`-t a Drive-ról.
-2. Normalizált névvel (ékezet, „dr.”, sorrend: Vezetéknév Keresztnév ↔ First
-   Last) és e-mail/cégnévvel párosít.
+1. Letölti a telefonkönyv-exportot és a `Connections.csv`-t a Drive-ról.
+2. Lefuttatja: `python3 -I scripts/telefonkonyv_egyeztetes.py Connections.csv
+   <telefonkönyv> --naplo data/linkedin-meghivo-naplo.csv --max 20`. A szkript
+   ékezet, titulus („dr.”) és névsorrend nélkül, illetve e-maillel párosít, az
+   egyszavas bejegyzéseket („Anyu”) kihagyja. Az export óta elfogadott meghívókat
+   (Gmail „accepted your invitation”) is kapcsolatnak kell tekinteni.
 3. Akik a telefonkönyvben vannak, de a kapcsolatok között nincsenek: lista
    LinkedIn-keresőlinkkel
    (`https://www.linkedin.com/search/results/people/?keywords=<név>+<cég>`) és
