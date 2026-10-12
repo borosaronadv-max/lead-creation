@@ -1,7 +1,9 @@
 """Telefonkönyv ↔ LinkedIn-kapcsolatok egyeztetése.
 
 Használat:
-    python3 scripts/telefonkonyv_egyeztetes.py Connections.csv telefonkonyv.(csv|vcf) [--napló data/linkedin-meghivo-naplo.csv] [--max 20]
+    python3 scripts/telefonkonyv_egyeztetes.py Connections.csv telefonkonyv.(csv|vcf|xlsx)
+        [--lap Kontaktok_Tisztitott] [--prioritas lp_final_score]
+        [--naplo data/linkedin-meghivo-naplo.csv] [--kapcsolat "Név" ...] [--max 20]
 
 Kimenet (stdout, CSV): azok a telefonkönyv-bejegyzések, akik nincsenek a
 LinkedIn-kapcsolatok között, LinkedIn-keresőlinkkel.
@@ -14,7 +16,7 @@ import sys
 import unicodedata
 import urllib.parse
 
-TITULUSOK = {"dr", "ifj", "id", "prof", "phd", "mba", "jr", "sr", "dipl", "ing"}
+TITULUSOK = {"dr", "ifj", "id", "prof", "phd", "mba", "jr", "sr", "dipl", "ing", "mr", "mrs", "ms", "mrics"}
 
 
 def nev_kulcs(nev):
@@ -71,18 +73,54 @@ def csv_beolvasasa(szoveg):
         }
 
 
+def xlsx_beolvasasa(utvonal, lap):
+    """Outlook-stílusú oszlopnevek (display_name, organization, ...) xlsx-ben."""
+    import openpyxl
+
+    wb = openpyxl.load_workbook(utvonal, read_only=True, data_only=True)
+    ws = wb[lap] if lap else wb.worksheets[0]
+    sorok = ws.iter_rows(values_only=True)
+    fejlec = [str(c or "").strip().lower() for c in next(sorok)]
+    for sor in sorok:
+        r = {k: ("" if v is None else str(v).strip()) for k, v in zip(fejlec, sor)}
+        nev = r.get("display_name") or f"{r.get('last_name', '')} {r.get('first_name', '')}".strip()
+        yield {
+            "nev": nev,
+            "ceg": r.get("organization", ""),
+            "beosztas": r.get("job_title", ""),
+            "email": r.get("e-mail_address", ""),
+            "telefon": r.get("mobile_phone") or r.get("business_phone", ""),
+            "_sor": r,
+        }
+
+
+def szam(ertek):
+    try:
+        return float(ertek)
+    except (TypeError, ValueError):
+        return 0.0
+
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("kapcsolatok")
     p.add_argument("telefonkonyv")
     p.add_argument("--naplo", help="korábban listázottak (nev oszlop), ezeket kihagyja")
     p.add_argument("--max", type=int, default=20)
+    p.add_argument("--lap", help="xlsx munkalap neve (alapból az első)")
+    p.add_argument("--prioritas", help="xlsx oszlop, ami szerint csökkenő sorrendbe rendez")
+    p.add_argument("--kapcsolat", nargs="*", default=[],
+                   help="az export óta elfogadott meghívók nevei (kapcsolatnak számítanak)")
     a = p.parse_args()
 
     nevek, emailek = kapcsolatok_beolvasasa(a.kapcsolatok)
-    with open(a.telefonkonyv, encoding="utf-8-sig", errors="replace") as f:
-        szoveg = f.read()
-    bejegyzesek = vcf_beolvasasa(szoveg) if "BEGIN:VCARD" in szoveg[:2000] else csv_beolvasasa(szoveg)
+    nevek |= {nev_kulcs(n) for n in a.kapcsolat}
+    if a.telefonkonyv.lower().endswith((".xlsx", ".xlsm")):
+        bejegyzesek = xlsx_beolvasasa(a.telefonkonyv, a.lap)
+    else:
+        with open(a.telefonkonyv, encoding="utf-8-sig", errors="replace") as f:
+            szoveg = f.read()
+        bejegyzesek = vcf_beolvasasa(szoveg) if "BEGIN:VCARD" in szoveg[:2000] else csv_beolvasasa(szoveg)
 
     kihagy = set()
     if a.naplo:
@@ -92,7 +130,7 @@ def main():
         except FileNotFoundError:
             pass
 
-    latott, talalatok = set(), []
+    latott, talalatok, egyezett = set(), [], 0
     for b in bejegyzesek:
         kulcs = nev_kulcs(b["nev"])
         # Egyszavas nevek (pl. "Anyu", "Vízvezeték-szerelő") nem azonosíthatók.
@@ -100,17 +138,25 @@ def main():
             continue
         latott.add(kulcs)
         if kulcs in nevek or (b["email"] and b["email"].lower() in emailek):
+            egyezett += 1
             continue
-        kereses = urllib.parse.quote_plus(f"{b['nev']} {b['ceg']}".strip())
+        b["prioritas"] = (b.get("_sor") or {}).get(a.prioritas.lower(), "") if a.prioritas else ""
+        ceg_rovid = " ".join(re.sub(r"[^\w\s&.-]", " ", b["ceg"]).split()[:2])
+        tiszta_nev = " ".join(
+            sz for sz in b["nev"].split() if sz.lower().strip(".,") not in TITULUSOK
+        )
+        kereses = urllib.parse.quote_plus(f"{tiszta_nev} {ceg_rovid}".strip())
         b["kereso_link"] = f"https://www.linkedin.com/search/results/people/?keywords={kereses}"
         talalatok.append(b)
 
-    # Előre azok, akiknél van cég (pontosabb keresés, valószínűbb szakmai kapcsolat).
-    talalatok.sort(key=lambda b: (not b["ceg"], b["nev"]))
-    w = csv.DictWriter(sys.stdout, fieldnames=["nev", "ceg", "email", "telefon", "kereso_link"])
+    # Előre a magas prioritásúak, utána akiknél van cég (pontosabb keresés).
+    talalatok.sort(key=lambda b: (-szam(b.get("prioritas")), not b["ceg"], b["nev"]))
+    mezok = ["nev", "ceg", "beosztas", "email", "telefon", "prioritas", "kereso_link"]
+    w = csv.DictWriter(sys.stdout, fieldnames=mezok, extrasaction="ignore")
     w.writeheader()
     w.writerows(talalatok[: a.max])
-    print(f"# telefonkönyv: {len(latott)} egyedi név, nincs LinkedIn-kapcsolat: {len(talalatok)}", file=sys.stderr)
+    print(f"# telefonkönyv: {len(latott)} egyedi név, LinkedIn-kapcsolat: {egyezett}, "
+          f"nincs LinkedIn-kapcsolat: {len(talalatok)}", file=sys.stderr)
 
 
 if __name__ == "__main__":

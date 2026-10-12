@@ -41,7 +41,7 @@ Drive-hozzáférés), a jelentés is ott jelenik meg.
 | Profilmegtekintők nevei | csak a LinkedIn felületén | e-mailben nem jön; lásd 1. lépés |
 | Elfogadott meghívók | Gmail: `from:invitations@linkedin.com subject:accepted` | sikerességmérés |
 | Saját kapcsolatok | `Connections.csv` a LinkedIn adatexportból, Google Drive `Linkedin/` mappa (feltöltve 2026-10-12, export: 10-05, 2 386 kapcsolat) | Settings → Data privacy → Get a copy of your data → Connections |
-| Telefonkönyv | `contacts.csv` / `.vcf` Google Drive `Linkedin/` mappa | Google Contacts → Export (Google CSV), vagy iPhone-ról vCard. **2026-10-12-én még hiányzik.** A `linkedin_connections_1005.xlsx` a kapcsolatok felől egyeztetett (1 157 kapcsolat van a címlistában), de a LinkedInen *nem* lévő telefonkönyv-bejegyzések csak a nyers exportból derülnek ki |
+| Telefonkönyv | `telefonk_2607_prior_LP.xlsx`, Google Drive `Linkedin/` mappa, `Kontaktok_Tisztitott` lap (5 568 névjegy, `lp_final_score` prioritással) | 2026-07-17-i export, feltöltve 2026-10-12. Az első futás: 4 682 egyedi névből 1 130 LinkedIn-kapcsolat, 3 552 nem |
 | Adatnapló | `data/linkedin-stats.csv` ebben a repóban | minden futás hozzáírja az új értékeket és pusholja |
 
 ## 1. Profilmegtekintők (napi)
@@ -63,7 +63,8 @@ személy.
 
 1. Letölti a telefonkönyv-exportot és a `Connections.csv`-t a Drive-ról.
 2. Lefuttatja: `python3 -I scripts/telefonkonyv_egyeztetes.py Connections.csv
-   <telefonkönyv> --naplo data/linkedin-meghivo-naplo.csv --max 20`. A szkript
+   telefonk_2607_prior_LP.xlsx --lap Kontaktok_Tisztitott --prioritas lp_final_score
+   --naplo data/linkedin-meghivo-naplo.csv --kapcsolat <export óta elfogadottak> --max 20`. A szkript
    ékezet, titulus („dr.”) és névsorrend nélkül, illetve e-maillel párosít, az
    egyszavas bejegyzéseket („Anyu”) kihagyja. Az export óta elfogadott meghívókat
    (Gmail „accepted your invitation”) is kapcsolatnak kell tekinteni.
@@ -73,10 +74,11 @@ személy.
    rövid magyar meghívószöveggel (max. 200 karakter, tegeződés/magázódás a
    telefonkönyv-bejegyzés és a Gmail-levelezés alapján).
 4. Hetente legfeljebb 20 név (a LinkedIn heti meghívókorlátja ~100, de a
-   minőségi, nem tömeges meghívás a cél). Prioritás: akivel az elmúlt 12 hónapban
-   volt levelezés.
+   minőségi, nem tömeges meghívás a cél). Sorrend: `lp_final_score` csökkenő,
+   azon belül akinél van cég.
 5. Az egyszer már listázott neveket a `data/linkedin-meghivo-naplo.csv` tartja
-   nyilván, nem kerülnek újra listára 90 napig.
+   nyilván (csak név, cég, dátum — telefonszám és e-mail nem kerül a repóba), ezek
+   nem kerülnek újra listára.
 
 ## 3. Napi jelentés
 
