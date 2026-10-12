@@ -1,36 +1,42 @@
 # LinkedIn-rutin
 
-Napi LinkedIn-jelentés és hetente egyszer kapcsolatépítési lista Boros Áron
-profiljához. A rutin a levelezési modellhez hasonlóan **kontrollpontos**: a rutin
-elemez, listát és meghívószöveget készít, a LinkedIn-en **meghívót Áron küld**.
+Napi LinkedIn-jelentés és heti kapcsolatépítési lista Boros Áron profiljához.
+A rutin két részből áll:
 
-## Miért nem küld a rutin magától meghívót?
+| Rész | Hol fut | Mit csinál |
+|---|---|---|
+| **A. Felhős rutin** | ütemezve, Claude Code felhős munkamenet (Gmail + Drive) | napi statisztika és jelentés; hétfőn telefonkönyv-egyeztetés, a heti 20 név beírása a munkalapra |
+| **B. Böngészős lépés** | Claude Desktop + Claude in Chrome, Áron gépén, kézzel indítva | profilnézők beolvasása, profilok megkeresése, meghívók előkészítése; a **Küldést Áron hagyja jóvá** |
 
-- A LinkedIn-nek nincs magánszemélyeknek elérhető API-ja a „Ki nézte meg a
-  profilomat” listához és a meghívóküldéshez. Az ütemezett rutin felhőben fut,
-  LinkedIn-belépés nélkül.
-- A LinkedIn felhasználási feltételei tiltják az automatizált (bot/scraper)
-  kapcsolódást; az ilyen fiókokat a LinkedIn korlátozza vagy letiltja. Egy
-  CEO-profilnál ez nem éri meg a kockázatot.
-- A profilmegtekintők nevét a LinkedIn csak a felületen mutatja (ingyenes
-  fióknál csak az utolsó néhányat), e-mailben csak a darabszámot küldi.
+A két rész a Drive-on lévő [LinkedIn meghívók](https://docs.google.com/spreadsheets/d/1QSTRW8XBr4myeypzQKXsCWUmojhDj94Te5ChPalk6uM/edit)
+munkalapon keresztül dolgozik együtt (`Linkedin/` mappa, lapok: `Telefonkönyv`,
+`Profilnézők`, `Útmutató`).
 
-Ezért a rutin: kigyűjti, ami az adatforrásokból elérhető, és **kattintásra kész
-listát** ad (profil-/keresőlink + személyre szabott meghívószöveg). A küldés
-naponta 2–5 perc Áron részéről.
+## Miért ez a felosztás?
+
+- A felhős rutin megbízhatóan fut akkor is, ha Áron gépe ki van kapcsolva, de a
+  LinkedIn felületét nem éri el (nincs belépés, a LinkedIn-nek nincs erre API-ja).
+- A böngészős lépés eléri Áron bejelentkezett LinkedIn-jét, de csak akkor fut,
+  ha a gép, a Desktop app és a Chrome be van kapcsolva.
+- A LinkedIn felhasználási feltételei tiltják az automatizált meghívóküldést, és
+  a böngészőből küldött tömeges meghívók is fiókkorlátozást kockáztatnak. Ezért a
+  Küldés gombot Áron nyomja meg, vagy legfeljebb 5-ös adagonként kifejezetten
+  jóváhagyja. Naponta legfeljebb 20 meghívó megy ki.
+- A profilnézők nevét a LinkedIn csak a felületen mutatja (ingyenes fióknál csak
+  a legutóbbi néhányat), e-mailben csak a darabszámot küldi.
 
 ## Ütemezés
 
 | Rész | Mikor | Tartalom |
 |---|---|---|
-| Napi jelentés | minden nap ~05:45 (Europe/Budapest) | statisztika, 90 napos dinamika, javasolt aktivitás, profilmegtekintők teendőlistája |
-| Telefonkönyv-egyeztetés | hétfőnként, a napi futás része | telefonkönyv ↔ LinkedIn-kapcsolatok összevetése, meghívólista |
+| A. Napi jelentés | minden nap ~05:45 (Europe/Budapest) | statisztika, 90 napos dinamika, javasolt aktivitás, a munkalap nyitott tételei |
+| A. Telefonkönyv-egyeztetés | hétfőnként, a napi futás része | 20 új név a `Telefonkönyv` lapra |
+| B. Böngészős lépés | munkanapokon, amikor Áron a gépnél van (kb. 5–10 perc) | profilnézők, profilkeresés, meghívók előkészítése és jóváhagyásos küldése |
 
-Megvalósítás: „LinkedIn rutin (ebbe a munkamenetbe)”, cron
+Az A rész: „LinkedIn rutin (ebbe a munkamenetbe)”, cron
 `CRON_TZ=Europe/Budapest 45 5 * * *`. A 6:00 helyett 5:45: az egész órás
 időpontokon torlódik az ütemező, így a jelentés 6-ra biztosan kész. A futás abba a
-Claude Code munkamenetbe érkezik, ahol a rutin készült (itt van Gmail- és
-Drive-hozzáférés), a jelentés is ott jelenik meg.
+Claude Code munkamenetbe érkezik, ahol a rutin készült, a jelentés is ott jelenik meg.
 
 ## Adatforrások
 
@@ -38,28 +44,27 @@ Drive-hozzáférés), a jelentés is ott jelenik meg.
 |---|---|---|
 | Heti bejegyzés-megjelenés | Gmail: `from:notifications-noreply@linkedin.com subject:impressions` — „your posts got N impressions last week”, hétfőnként | a tárgysorból olvasható |
 | Profilmegtekintések száma | Gmail: `from:linkedin.com subject:"profile is popular"` — „Your profile is popular - N people” | ritka, rendszertelen; a szám a LinkedIn szerinti utolsó 90 nap |
-| Profilmegtekintők nevei | csak a LinkedIn felületén | e-mailben nem jön; lásd 1. lépés |
+| Profilmegtekintők nevei | `LinkedIn meghívók` munkalap, `Profilnézők` lap | a B rész írja a linkedin.com/me/profile-views oldalról |
+| Meghívók állapota | `LinkedIn meghívók` munkalap, `Telefonkönyv` lap | listázva → előkészítve → elküldve → elfogadva / nincs profil / kihagyva |
 | Elfogadott meghívók | Gmail: `from:invitations@linkedin.com subject:accepted` | sikerességmérés |
 | Saját kapcsolatok | `Connections.csv` a LinkedIn adatexportból, Google Drive `Linkedin/` mappa (feltöltve 2026-10-12, export: 10-05, 2 386 kapcsolat) | Settings → Data privacy → Get a copy of your data → Connections |
 | Telefonkönyv | `telefonk_2607_prior_LP.xlsx`, Google Drive `Linkedin/` mappa, `Kontaktok_Tisztitott` lap (5 568 névjegy, `lp_final_score` prioritással) | 2026-07-17-i export, feltöltve 2026-10-12. Az első futás: 4 682 egyedi névből 1 130 LinkedIn-kapcsolat, 3 552 nem |
 | Adatnapló | `data/linkedin-stats.csv` ebben a repóban | minden futás hozzáírja az új értékeket és pusholja |
 
-## 1. Profilmegtekintők (napi)
+## 1. Profilmegtekintők
 
-A rutin a Gmailből nem tudja a neveket, ezért:
+A B rész (böngészős lépés) olvassa be a linkedin.com/me/profile-views oldalt, és a
+`Profilnézők` lapra írja az új nézőket (dátum, név, titulus/cég, profil URL, hogy
+kapcsolat-e). A nem kapcsolatban lévőkhöz meghívószöveget ír.
 
-1. Ha Áron a `Linkedin/profilnezok.txt` Drive-fájlba bemásolja a
-   linkedin.com/me/profile-views oldal listáját (név, titulus — elég kijelölni és
-   bemásolni), a rutin összeveti a `Connections.csv`-vel, és a **nem kapcsolatban
-   lévőkre** meghívószöveget ír.
-2. Ha nincs új bemásolt lista, a jelentés egy sorban emlékeztet a link
-   megnyitására.
+A felhős rutin másnap reggel ebből a lapból összesíti a nézőket és a nyitott
+meghívókat. Ha a lapra 3 napja nem került új sor, a jelentés egy sorban
+emlékeztet a böngészős lépés futtatására.
 
-Kizárás: recruiterek/értékesítők tömeges nézései, névtelen nézők, már függő
-meghívó (a `Connections.csv` és a korábbi listák alapján), korábban elutasított
-személy.
+Kizárás: recruiterek és értékesítők tömeges nézései, névtelen nézők, már függő
+meghívó, korábban kihagyott személy.
 
-## 2. Telefonkönyv-egyeztetés (hétfő)
+## 2. Telefonkönyv-egyeztetés (hétfő, A rész)
 
 1. Letölti a telefonkönyv-exportot és a `Connections.csv`-t a Drive-ról.
 2. Lefuttatja: `python3 -I scripts/telefonkonyv_egyeztetes.py Connections.csv
@@ -68,8 +73,9 @@ személy.
    ékezet, titulus („dr.”) és névsorrend nélkül, illetve e-maillel párosít, az
    egyszavas bejegyzéseket („Anyu”) kihagyja. Az export óta elfogadott meghívókat
    (Gmail „accepted your invitation”) is kapcsolatnak kell tekinteni.
-3. Akik a telefonkönyvben vannak, de a kapcsolatok között nincsenek: lista
-   LinkedIn-keresőlinkkel
+3. Akik a telefonkönyvben vannak, de a kapcsolatok között nincsenek: a
+   `LinkedIn meghívók` munkalap `Telefonkönyv` lapjára ír 20 új sort (állapot:
+   `listázva`), LinkedIn-keresőlinkkel
    (`https://www.linkedin.com/search/results/people/?keywords=<név>+<cég>`) és
    rövid magyar meghívószöveggel (max. 200 karakter, tegeződés/magázódás a
    telefonkönyv-bejegyzés és a Gmail-levelezés alapján).
@@ -79,8 +85,37 @@ személy.
 5. Az egyszer már listázott neveket a `data/linkedin-meghivo-naplo.csv` tartja
    nyilván (csak név, cég, dátum — telefonszám és e-mail nem kerül a repóba), ezek
    nem kerülnek újra listára.
+6. A `Telefonkönyv` lapon `elfogadva` állapotra állítja azokat, akik a Gmail
+   szerint elfogadták a meghívót.
 
-## 3. Napi jelentés
+## 3. Böngészős lépés (B rész)
+
+Áron gépén, a Claude Desktop appban, bekapcsolt Claude in Chrome bővítménnyel,
+bejelentkezett LinkedIn-nel. Indítás: az alábbi szöveg bemásolása egy új
+Desktop-beszélgetésbe.
+
+```
+LinkedIn böngészős lépés (lead-creation repó, docs/linkedin-rutin.md).
+Nyisd meg a Drive-on a "LinkedIn meghívók" munkalapot.
+1) Chrome-ban nyisd meg a linkedin.com/me/profile-views oldalt. Az új nézőket írd
+   a Profilnézők lapra (dátum, név, titulus/cég, profil URL, kapcsolat-e). A nem
+   kapcsolatban lévőkhöz írj max. 200 karakteres magázó meghívószöveget.
+2) A Telefonkönyv lap "listázva" soraira: a keresőlinkkel keresd meg a profilt.
+   Ha a cég és a név alapján egyértelmű, írd be a Profil URL-t és állítsd
+   "előkészítve"-re. Ha nincs vagy nem egyértelmű, "nincs profil" és megjegyzés.
+3) Az "előkészítve" sorokhoz (Profilnézők és Telefonkönyv) nyisd meg a profilt,
+   kattints a Kapcsolódás > Megjegyzés hozzáadása gombra, és írd be a
+   meghívószöveget. A Küldés gombot NE nyomd meg: mutasd meg 5-ös adagokban a
+   neveket, és csak az általam jóváhagyott adagot küldd el. Utána állítsd
+   "elküldve"-re. Naponta legfeljebb 20 meghívó.
+Ha a LinkedIn ellenőrzést (captcha), figyelmeztetést vagy korlátot jelez, azonnal
+állj meg és szólj.
+```
+
+A böngészős lépés nem küld üzenetet, nem fogad el és nem utasít el beérkező
+meghívót, és nem módosítja a profilt.
+
+## 4. Napi jelentés
 
 ```
 🔗 LinkedIn – <dátum>
@@ -97,11 +132,12 @@ Havi bontás: <hónap>: <N> (<±%>) · …
 🎯 Javasolt aktivitás (max. 3, konkrét, erre a hétre)
 - …
 
-👀 Profilmegtekintők → meghívó (ha van bemásolt lista)
-- <név> – <titulus> – <link> – „<meghívószöveg>”
+👀 Profilnézők (a munkalapról, tegnap óta)
+- <név> – <titulus> – kapcsolat? – állapot
 
-📇 Telefonkönyv → meghívó (csak hétfőn)
-- <név> – <cég> – <keresőlink> – „<meghívószöveg>”
+📇 Meghívók állapota (munkalap)
+listázva: N · előkészítve: N · elküldve: N · elfogadva: N · nincs profil: N
+Hétfőn: „20 új név a Telefonkönyv lapon, futtasd a böngészős lépést”
 
 ✅ Elfogadott meghívók tegnap óta: <nevek>
 ```
