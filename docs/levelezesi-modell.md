@@ -10,11 +10,11 @@ Hétköznap (H–P), Europe/Budapest időzóna, két futás:
 
 | Futás | Időpont | Tartalom |
 |---|---|---|
-| Reggeli | ~7:30 | triázs + piszkozatok + **napi összefoglaló** |
+| Reggeli | ~5:30 | triázs + piszkozatok + **napi összefoglaló** |
 | Délutáni | ~13:30 | triázs + piszkozatok + rövid frissítés (csak az új tételek) |
 
 Megvalósítás: „Levelezési triázs (ebbe a munkamenetbe)” rutin, cron
-`CRON_TZ=Europe/Budapest 28 7,13 * * 1-5`. A futások abba a Claude Code munkamenetbe
+`CRON_TZ=Europe/Budapest 28 5,13 * * 1-5`. A futások abba a Claude Code munkamenetbe
 érkeznek, ahol a modell készült, mert annak van Gmail-hozzáférése. Az összefoglaló is
 ott jelenik meg, push/e-mail értesítés nincs.
 
