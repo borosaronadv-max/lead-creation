@@ -5,7 +5,7 @@ A rutin két részből áll:
 
 | Rész | Hol fut | Mit csinál |
 |---|---|---|
-| **A. Felhős rutin** | ütemezve, Claude Code felhős munkamenet (Gmail + Drive) | napi statisztika és jelentés; hétfőn telefonkönyv-egyeztetés, a heti 20 név beírása a munkalapra |
+| **A. Felhős rutin** | ütemezve, Claude Code felhős munkamenet (Gmail + Drive) | napi statisztika és jelentés; hétfőn telefonkönyv-egyeztetés, a heti 40 célcsoport-jelölt beírása a munkalapra |
 | **B. Böngészős lépés** | Claude Desktop + Claude in Chrome, Áron gépén, kézzel indítva | profilnézők beolvasása, profilok megkeresése, meghívók előkészítése; a **Küldést Áron hagyja jóvá** |
 
 A két rész a Drive-on lévő [LinkedIn meghívók](https://docs.google.com/spreadsheets/d/1QSTRW8XBr4myeypzQKXsCWUmojhDj94Te5ChPalk6uM/edit)
@@ -30,7 +30,7 @@ munkalapon keresztül dolgozik együtt (`Linkedin/` mappa, lapok: `Telefonkönyv
 | Rész | Mikor | Tartalom |
 |---|---|---|
 | A. Napi jelentés | minden nap ~05:45 (Europe/Budapest) | statisztika, 90 napos dinamika, javasolt aktivitás, a munkalap nyitott tételei |
-| A. Telefonkönyv-egyeztetés | hétfőnként, a napi futás része | 20 új név a `Telefonkönyv` lapra |
+| A. Telefonkönyv-egyeztetés | hétfőnként, a napi futás része | 40 célcsoport-jelölt a `Telefonkönyv` lapra (tulajdonos/CEO/CFO, árbevétel-ellenőrzésre) |
 | B. Böngészős lépés | munkanapokon, amikor Áron a gépnél van (kb. 5–10 perc) | profilnézők, profilkeresés, meghívók előkészítése és jóváhagyásos küldése |
 
 Az A rész: „LinkedIn rutin (ebbe a munkamenetbe)”, cron
@@ -66,25 +66,35 @@ meghívó, korábban kihagyott személy.
 
 ## 2. Telefonkönyv-egyeztetés (hétfő, A rész)
 
+**Célcsoport:** 2–20 Mrd Ft árbevételű cégek tulajdonosai, CEO-i (vezérigazgató,
+ügyvezető, managing director) és CFO-i (pénzügyi/gazdasági igazgató).
+
 1. Letölti a telefonkönyv-exportot és a `Connections.csv`-t a Drive-ról.
-2. Lefuttatja: `python3 -I scripts/telefonkonyv_egyeztetes.py Connections.csv
-   telefonk_2607_prior_LP.xlsx --lap Kontaktok_Tisztitott --prioritas lp_final_score
-   --naplo data/linkedin-meghivo-naplo.csv --kapcsolat <export óta elfogadottak> --max 20`. A szkript
-   ékezet, titulus („dr.”) és névsorrend nélkül, illetve e-maillel párosít, az
-   egyszavas bejegyzéseket („Anyu”) kihagyja. Az export óta elfogadott meghívókat
-   (Gmail „accepted your invitation”) is kapcsolatnak kell tekinteni.
-3. Akik a telefonkönyvben vannak, de a kapcsolatok között nincsenek: a
-   `LinkedIn meghívók` munkalap `Telefonkönyv` lapjára ír 20 új sort (állapot:
-   `listázva`), LinkedIn-keresőlinkkel
-   (`https://www.linkedin.com/search/results/people/?keywords=<név>+<cég>`) és
-   rövid magyar meghívószöveggel (max. 200 karakter, tegeződés/magázódás a
-   telefonkönyv-bejegyzés és a Gmail-levelezés alapján).
-4. Hetente legfeljebb 20 név (a LinkedIn heti meghívókorlátja ~100, de a
-   minőségi, nem tömeges meghívás a cél). Sorrend: `lp_final_score` csökkenő,
-   azon belül akinél van cég.
-5. Az egyszer már listázott neveket a `data/linkedin-meghivo-naplo.csv` tartja
-   nyilván (csak név, cég, dátum — telefonszám és e-mail nem kerül a repóba), ezek
-   nem kerülnek újra listára.
+2. Lefuttatja:
+   `python3 -I scripts/telefonkonyv_egyeztetes.py Connections.csv telefonk_2607_prior_LP.xlsx
+   --lap Kontaktok_Tisztitott --celcsoport --prioritas priority_score_10
+   --naplo data/linkedin-meghivo-naplo.csv --kapcsolat <export óta elfogadottak> --max 40`
+   - Párosítás ékezet, titulus és névsorrend nélkül, illetve e-maillel; egyszavas
+     bejegyzések kimaradnak. Az export óta elfogadott meghívók kapcsolatnak számítanak.
+   - `--celcsoport`: csak a tulajdonos/CEO/CFO beosztásúak; helyettesek,
+     asszisztensek kimaradnak. Kizárt szervezetek: bankok, állami és önkormányzati
+     hivatalok, oktatás, egyesületek, klaszterek, alapkezelők és befektetők, Big4,
+     multinacionális és ismerten 20 Mrd Ft fölötti cégcsoportok.
+   - Sorrend: `priority_score_10` csökkenő, azon belül a Zrt.-k előre.
+   - Első futás (2026-10-13): 4 682 egyedi névből 366 célcsoport-szerep, ebből
+     152 már kapcsolat, 214 nem.
+3. **Az árbevételt a névjegyek nem tartalmazzák, és a felhős környezet nem éri el
+   a cégadatbázisokat** (Opten, céginformáció, e-beszámoló). Ezért a rutin hetente
+   40 jelöltet ír a `Telefonkönyv` lapra (állapot: `listázva`, az
+   `Árbevétel (Mrd Ft)` oszlop üres), és az árbevételt a böngészős lépés ellenőrzi.
+   Ha Áron feltölt egy árbevétel-exportot (pl. Opten-lista adószámmal/cégnévvel) a
+   `Linkedin/` mappába, a rutin azzal előre szűr.
+4. Meghívószöveg (max. 200 karakter, magázó): tulajdonos/CEO: „…cégvezetőként
+   szívesen tartanám Önnel LinkedInen is a kapcsolatot…”; CFO: „…finanszírozási
+   témákban szívesen tartanám…”.
+5. A listázott neveket a `data/linkedin-meghivo-naplo.csv` tartja nyilván (csak név,
+   cég, dátum; telefonszám és e-mail nem kerül a repóba), ezek nem kerülnek újra
+   listára.
 6. A `Telefonkönyv` lapon `elfogadva` állapotra állítja azokat, akik a Gmail
    szerint elfogadták a meghívót.
 
@@ -100,9 +110,14 @@ Nyisd meg a Drive-on a "LinkedIn meghívók" munkalapot.
 1) Chrome-ban nyisd meg a linkedin.com/me/profile-views oldalt. Az új nézőket írd
    a Profilnézők lapra (dátum, név, titulus/cég, profil URL, kapcsolat-e). A nem
    kapcsolatban lévőkhöz írj max. 200 karakteres magázó meghívószöveget.
-2) A Telefonkönyv lap "listázva" soraira: a keresőlinkkel keresd meg a profilt.
-   Ha a cég és a név alapján egyértelmű, írd be a Profil URL-t és állítsd
-   "előkészítve"-re. Ha nincs vagy nem egyértelmű, "nincs profil" és megjegyzés.
+2) A Telefonkönyv lap "listázva" soraira, felülről:
+   a) Árbevétel: nézd meg a cég legutóbbi nettó árbevételét (ceginformacio.hu,
+      opten.hu vagy e-beszamolo.im.gov.hu), írd az "Árbevétel (Mrd Ft)" oszlopba.
+      Ha 2 Mrd Ft alatti vagy 20 Mrd Ft fölötti, állapot: "kihagyva – árbevétel".
+      Ha a cég nem azonosítható, megjegyzés és "kihagyva".
+   b) A sávba esőknél a keresőlinkkel keresd meg a profilt. Ha a cég és a név
+      alapján egyértelmű, írd be a Profil URL-t és állítsd "előkészítve"-re.
+      Ha nincs vagy nem egyértelmű: "nincs profil" és megjegyzés.
 3) Az "előkészítve" sorokhoz (Profilnézők és Telefonkönyv) nyisd meg a profilt,
    kattints a Kapcsolódás > Megjegyzés hozzáadása gombra, és írd be a
    meghívószöveget. A Küldés gombot NE nyomd meg: mutasd meg 5-ös adagokban a
@@ -137,7 +152,7 @@ Havi bontás: <hónap>: <N> (<±%>) · …
 
 📇 Meghívók állapota (munkalap)
 listázva: N · előkészítve: N · elküldve: N · elfogadva: N · nincs profil: N
-Hétfőn: „20 új név a Telefonkönyv lapon, futtasd a böngészős lépést”
+Hétfőn: „40 új célcsoport-jelölt a Telefonkönyv lapon, futtasd a böngészős lépést”
 
 ✅ Elfogadott meghívók tegnap óta: <nevek>
 ```
