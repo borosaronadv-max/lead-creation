@@ -41,6 +41,21 @@ Az A rész: „LinkedIn rutin (ebbe a munkamenetbe)”, cron
 időpontokon torlódik az ütemező, így a jelentés 6-ra biztosan kész. A futás abba a
 Claude Code munkamenetbe érkezik, ahol a rutin készült, a jelentés is ott jelenik meg.
 
+### Naptár (Gmail + céges Outlook)
+
+A böngészős lépések és a posztolás időkerete ismétlődő eseményként a
+boros.aron.adv@gmail.com naptárban, a boros.aron@stradamus.hu naptárba meghívóként:
+
+| Esemény | Mikor | Időkeret |
+|---|---|---|
+| LinkedIn – napi meghívók + kommentelés | K–P 17:30 | 20 perc |
+| LinkedIn – heti célcsoport-lista: árbevétel + meghívók | H 17:30 | 40 perc |
+| LinkedIn – poszt megírása és közzététele | H, Sze 08:00 | 30 perc |
+| LinkedIn – havi poszt- és reakció-áttekintés, 2. fokú lista | a hónap első munkanapja 18:15 | 30 perc |
+
+Összesen kb. 3 óra hetente, plusz 30 perc havonta. A 2026-10-22 – 11-01 közötti
+szabadság alatti alkalmak törölve.
+
 ## Adatforrások
 
 | Adat | Forrás | Megjegyzés |
