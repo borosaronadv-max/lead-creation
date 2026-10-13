@@ -1,16 +1,17 @@
 # LinkedIn-rutin
 
-Napi LinkedIn-jelentés és heti kapcsolatépítési lista Boros Áron profiljához.
-A rutin két részből áll:
+Napi LinkedIn-jelentés, heti kapcsolatépítési lista és havi posztreakció-kimutatás
+Boros Áron profiljához. A rutin részei:
 
 | Rész | Hol fut | Mit csinál |
 |---|---|---|
 | **A. Felhős rutin** | ütemezve, Claude Code felhős munkamenet (Gmail + Drive) | napi statisztika és jelentés; hétfőn telefonkönyv-egyeztetés, a heti 40 célcsoport-jelölt beírása a munkalapra |
+| **H. Havi rutin** | felhő (kimutatás) + böngésző (adatgyűjtés, meghívók) | posztreakciók kimutatása, reagálók és 2. fokú CEO/CFO/tulajdonosok meghívása |
 | **B. Böngészős lépés** | Claude Desktop + Claude in Chrome, Áron gépén, kézzel indítva | profilnézők beolvasása, profilok megkeresése, meghívók előkészítése; a **Küldést Áron hagyja jóvá** |
 
-A két rész a Drive-on lévő [LinkedIn meghívók](https://docs.google.com/spreadsheets/d/1QSTRW8XBr4myeypzQKXsCWUmojhDj94Te5ChPalk6uM/edit)
+A részek a Drive-on lévő [LinkedIn meghívók](https://docs.google.com/spreadsheets/d/1QSTRW8XBr4myeypzQKXsCWUmojhDj94Te5ChPalk6uM/edit)
 munkalapon keresztül dolgozik együtt (`Linkedin/` mappa, lapok: `Telefonkönyv`,
-`Profilnézők`, `Útmutató`).
+`Profilnézők`, `Posztok`, `Reakciók`, `2. fokú`, `Útmutató`).
 
 ## Miért ez a felosztás?
 
@@ -31,6 +32,8 @@ munkalapon keresztül dolgozik együtt (`Linkedin/` mappa, lapok: `Telefonkönyv
 |---|---|---|
 | A. Napi jelentés | minden nap ~05:45 (Europe/Budapest) | statisztika, 90 napos dinamika, javasolt aktivitás, a munkalap nyitott tételei |
 | A. Telefonkönyv-egyeztetés | hétfőnként, a napi futás része | 40 célcsoport-jelölt a `Telefonkönyv` lapra (tulajdonos/CEO/CFO, árbevétel-ellenőrzésre) |
+| H. Havi böngészős lépés | minden hónap 1–4. napja, egyszer (kb. 20–30 perc) | előző havi posztok és reagálók, 2. fokú célcsoport-jelöltek a munkalapra |
+| H. Havi kimutatás | minden hónap 5-én ~05:52 (Europe/Budapest) | posztreakciók kimutatása az előző hónapról |
 | B. Böngészős lépés | munkanapokon, amikor Áron a gépnél van (kb. 5–10 perc) | profilnézők, profilkeresés, meghívók előkészítése és jóváhagyásos küldése |
 
 Az A rész: „LinkedIn rutin (ebbe a munkamenetbe)”, cron
@@ -118,7 +121,7 @@ Nyisd meg a Drive-on a "LinkedIn meghívók" munkalapot.
    b) A sávba esőknél a keresőlinkkel keresd meg a profilt. Ha a cég és a név
       alapján egyértelmű, írd be a Profil URL-t és állítsd "előkészítve"-re.
       Ha nincs vagy nem egyértelmű: "nincs profil" és megjegyzés.
-3) Az "előkészítve" sorokhoz (Profilnézők és Telefonkönyv) nyisd meg a profilt,
+3) Az "előkészítve" sorokhoz (Profilnézők, Telefonkönyv, Reakciók, 2. fokú) nyisd meg a profilt,
    kattints a Kapcsolódás > Megjegyzés hozzáadása gombra, és írd be a
    meghívószöveget. A Küldés gombot NE nyomd meg: mutasd meg 5-ös adagokban a
    neveket, és csak az általam jóváhagyott adagot küldd el. Utána állítsd
@@ -156,6 +159,81 @@ Hétfőn: „40 új célcsoport-jelölt a Telefonkönyv lapon, futtasd a böngé
 
 ✅ Elfogadott meghívók tegnap óta: <nevek>
 ```
+
+## 5. Havi rutin (posztreakciók és 2. fokú célcsoport)
+
+### H1. Havi böngészős lépés (Áron gépén, a hónap 1–4. napján)
+
+Indítás: az alábbi szöveg egy új Claude Desktop-beszélgetésben, bekapcsolt Claude in
+Chrome bővítménnyel és bejelentkezett LinkedInnel.
+
+```
+LinkedIn havi böngészős lépés (lead-creation repó, docs/linkedin-rutin.md, 5. pont).
+Munkalap: Drive "LinkedIn meghívók". Hónap = az előző naptári hónap (ÉÉÉÉ-HH).
+1) Posztok: a linkedin.com/in/me/recent-activity/all/ oldalon az előző hónap saját
+   posztjait írd a Posztok lapra (dátum, URL, első sor, formátum, megjelenés,
+   reakció, komment, megosztás; a számok a poszt alatti elemzésből).
+2) Reakciók: minden posztnál nyisd meg a reakciók listáját, és minden reagálót írd
+   a Reakciók lapra (név, titulus, cég, fokozat 1./2./3., reakció típusa, profil URL).
+   Szerep: "tulajdonos"/"CEO"/"CFO"/"egyéb" a titulus alapján. 1. fokúaknál
+   Állapot = "kapcsolat". A többieknél (2./3. fok) Állapot = "listázva" és max. 200
+   karakteres magázó meghívószöveg: "Tisztelt <Név>! Köszönöm, hogy reagált a
+   bejegyzésemre; örülnék, ha LinkedInen is kapcsolatban maradnánk. Üdvözlettel:
+   Boros Áron". Ha a reagáló több posztra is reagált, egy sor elég (megjegyzés: hány).
+3) 2. fokú célcsoport: LinkedIn-keresés, Emberek, Kapcsolatok: 2. fok, Hely:
+   Magyarország, kulcsszó egyenként: CEO, CFO, vezérigazgató, ügyvezető, pénzügyi
+   igazgató, alapító, founder, tulajdonos, owner. A találatokból max. 40 főt írj a
+   "2. fokú" lapra (név, titulus, cég, szerep, profil URL, közös kapcsolatok száma),
+   előre a több közös kapcsolattal rendelkezőket. Ne vedd fel, aki a Telefonkönyv
+   vagy a 2. fokú lapon már szerepel. Ellenőrizd a cég árbevételét (ceginformacio.hu,
+   opten.hu vagy e-beszamolo.im.gov.hu): 2 Mrd Ft alatt vagy 20 Mrd Ft fölött
+   "kihagyva – árbevétel". A sávba esőknél meghívószöveg: "Tisztelt <Név>! Közös
+   ismerőseink révén figyeltem fel Önre; cégvezetőként szívesen kapcsolódnék
+   LinkedInen is. Üdvözlettel: Boros Áron, Stradamus" (CFO-nál: "...pénzügyi
+   vezetőként..."), állapot "előkészítve".
+4) Meghívók: a Reakciók és a 2. fokú lap "listázva"/"előkészítve" soraihoz nyisd
+   meg a profilt, Kapcsolódás > Megjegyzés hozzáadása, írd be a szöveget. A Küldés
+   gombot NE nyomd meg: 5-ös adagokban mutasd a neveket, és csak a jóváhagyott
+   adagot küldd el, utána "elküldve". Az összes lapról együtt legfeljebb 20
+   meghívó naponta; ami ma nem fér bele, azt a napi böngészős lépés küldi tovább.
+Ha a LinkedIn ellenőrzést (captcha), figyelmeztetést, keresési vagy meghívókorlátot
+jelez, azonnal állj meg és szólj.
+```
+
+Megjegyzések:
+- Saját profil posztjainál a LinkedIn nem ad „meghívás követésre” funkciót (az a
+  céges oldalaké), ezért a nem kapcsolatban lévő reagálók kapcsolódási meghívót kapnak.
+- A LinkedIn ingyenes fióknál havonta korlátozza a keresések számát (commercial use
+  limit), ezért a 2. fokú keresés havi egyszeri, legfeljebb 40 fős.
+- Az 1. fokú (már meglévő) kapcsolatok közül 616 fő tulajdonos/CEO/CFO szerepkörű
+  (2026-10-13); nekik nem megy meghívó.
+
+### H2. Havi kimutatás (felhő, minden hónap 5-én)
+
+„LinkedIn havi rutin (ebbe a munkamenetbe)”, cron `CRON_TZ=Europe/Budapest 52 5 5 * *`.
+A Posztok és Reakciók lap előző havi soraiból, valamint a Gmail heti
+megjelenés-összesítőiből:
+
+```
+📣 LinkedIn havi kimutatás – <ÉÉÉÉ-HH>
+
+📝 Posztok: N db · megjelenés össz.: N · reakció: N · komment: N · megosztás: N
+Reakció / 1000 megjelenés: N (előző hónap: N)
+Top 3 poszt: <dátum> – <első sor> – <reakció>/<megjelenés>
+Leggyengébb: <dátum> – <első sor> – miért (formátum, időpont, téma)
+
+👥 Reagálók: N egyedi fő (1. fok: N · 2. fok: N · 3. fok: N)
+Szerep: tulajdonos N · CEO N · CFO N · egyéb N
+Visszatérő reagálók (2+ poszt): <nevek>
+Meghívók a reagálóknak: listázva N · elküldve N · elfogadva N
+
+🎯 2. fokú célcsoport: listázva N · kihagyva – árbevétel N · elküldve N · elfogadva N
+
+💡 Következő hónapra (max. 3): téma, formátum, időpont a top posztok alapján
+```
+
+Ha a Posztok lapon nincs előző havi sor, a kimutatás helyett egy sor: a havi
+böngészős lépés még nem futott. A napi jelentés a hónap 1–4. napján emlékeztet rá.
 
 ## Kezdeti adatok (2026-10-12)
 
