@@ -41,6 +41,34 @@ Az A rész: „LinkedIn rutin (ebbe a munkamenetbe)”, cron
 időpontokon torlódik az ütemező, így a jelentés 6-ra biztosan kész. A futás abba a
 Claude Code munkamenetbe érkezik, ahol a rutin készült, a jelentés is ott jelenik meg.
 
+### Futtatási környezet
+
+A felhős rutinok (A és H2) futásához ez kell:
+
+| Mi | Érték | Hol állítható |
+|---|---|---|
+| Repó | `borosaronadv-max/lead-creation` | claude.ai/code → Routines → a rutin → Repositories |
+| Ág | `claude/trusting-thompson-q7unak`, írási joggal (a `data/*.csv` commit + push miatt) | ugyanott |
+| Csatlakozók | Gmail, Google Drive, Google Sheets | claude.ai/code → Routines → a rutin → Connectors |
+
+| Rutin | Trigger ID | Ütemezés |
+|---|---|---|
+| LinkedIn rutin (napi) | `trig_01PcJe1Xg7135ERnG4hSTDi4` | `CRON_TZ=Europe/Budapest 45 5 * * *` |
+| LinkedIn havi rutin | `trig_01W6e1fwyP8VDVjyTnRvePkn` | `CRON_TZ=Europe/Budapest 52 5 5 * *` |
+
+Az ütemezett futás abba a munkamenetbe érkezik, ahol a rutin készült; ott a repó
+és a csatlakozók rendelkezésre állnak. A felületről kézzel indított futás („Run
+now”) új munkamenetet nyithat, amelyben csak az lesz elérhető, amit a rutin
+beállításában megadtak. A csatlakozókat a rutinhoz eszközzel nem lehet
+hozzárendelni, ezt a felületen kell bekapcsolni.
+
+Ha mégis üres munkakönyvtárban, csatlakozók nélkül indul a futás, az utasítás 0.
+lépése szerint:
+- a repót az `add_repo` eszközzel (owner `borosaronadv-max`, repo `lead-creation`,
+  access `push`) adja hozzá, klónozza és checkoutolja az ágat;
+- ha a Gmail, Drive vagy Sheets nem érhető el, a jelentés elején egy sorban jelzi,
+  melyik hiányzik, a többi lépést lefuttatja, repó nélkül pedig nem ír CSV-t.
+
 ### Naptár (Gmail + céges Outlook)
 
 A böngészős lépések és a posztolás időkerete ismétlődő eseményként a
