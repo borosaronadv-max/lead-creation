@@ -46,6 +46,7 @@ Kategóriacímkék (szálanként pontosan egy):
 |---|---|---|
 | `Triázs/Sürgős` | `Label_128` | Határidő 48 órán belül, ügyfél sürget, hatósági/fizetési határidő, eszkaláció |
 | `Triázs/Piszkozat-kész` | `Label_129` | A rutin válaszpiszkozatot készített a szálhoz |
+| `Triázs/Követés` | `Label_131` | Áron kimenő levelében kérés vagy vállalás van, amit követni kell |
 | `Triázs/Döntésre-vár` | `Label_130` | Áron döntése/tartalmi inputja kell (ár, vállalás, igen/nem, stratégiai kérdés) |
 
 A meglévő `INBOX/Stradamus/...` és `INBOX/Magán/...` címkékhez a rutin nem nyúl, és
@@ -64,6 +65,30 @@ nem archivál, nem töröl, nem jelöl olvasottnak semmit.
 - Bizonytalan adatot nem talál ki, hanem `[[...]]` jelöléssel hagy helyet.
 - **Elküldeni csak Áron küldi.** A rutin semmilyen küldő/továbbító eszközt nem használ.
 
+
+## 2/b. Követés – kimenő levelek (amit Áron kért vagy vállalt)
+
+Minden futás átnézi a kimenő leveleket (`in:sent newer_than:3d -label:triázs-követés`).
+Ha Áron **kért** valamit valakitől (küldjön, nézze meg, hívja fel, jelezzen vissza,
+véleményezze), vagy **vállalt** valamit („küldöm”, „beteszem a naptárba”, „jelentkezem”),
+a szál `Triázs/Követés` (`Label_131`) címkét kap.
+
+A nyitott követéseket (`label:triázs-követés`) a rutin minden futáskor újraolvassa:
+
+- **Típus:** „Várok rá” (más felé kért) vagy „Saját teendő” (Áron vállalta).
+- **Állapot:** nincs válasz / visszaigazolta, folyamatban / részben teljesült / teljesült.
+  Teljesült tételről a címke lekerül, és „✅ Lezárult” sorban jelenik meg.
+- **Prioritás:**
+  - **P1** – lejárt vagy 2 napon belül lejáró határidő, ügyfél/pénz/hatóság, vagy a másik
+    fél által ígért időpont már elmúlt;
+  - **P2** – 5+ munkanapja nincs válasz, vagy a saját vállalás még nem látszik teljesítettnek;
+  - **P3** – minden más.
+- **Emlékeztető-piszkozat:** P1/P2 „Várok rá” tételnél, ha 5+ munkanapja nincs válasz
+  (vagy az ígért időpont 2+ munkanapja elmúlt), a rutin udvarias emlékeztető-piszkozatot
+  írhat. Elküldeni ezt is csak Áron küldi.
+
+Reggel a teljes követési lista jelenik meg, délután csak az új, a lezárult és a P1 tételek.
+
 ## 3. Napi összefoglaló — 2. kontrollpont
 
 A rutin futásának végén rövid lista (a rutin értesítőjében jelenik meg):
@@ -77,6 +102,11 @@ Feldolgozva: N szál (Ügyfél x · Partner y · Admin z · Hírlevél w)
 
 ✍️ Piszkozat kész (átnézésre, küldés nálad)
 - <feladó> – <tárgy> – 1 mondat a válaszról
+
+📌 Követés (amit te kértél / vállaltál) – prioritás szerint
+P1 / P2 / P3
+- [Várok rá|Saját] <kitől/kinek> – <mit> – kérve: <dátum> – állapot – javasolt lépés
+✅ Lezárult: <tétel>
 
 ⚖️ Döntésre vár
 - <feladó> – <tárgy> – mi a kérdés, javasolt opciók
