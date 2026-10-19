@@ -4,19 +4,24 @@ A Gmail-postafiók (boros.aron.adv@gmail.com) feldolgozását egy ütemezett Cla
 végzi. A rutin **soha nem küld levelet**: csak címkéz, piszkozatot ír és összefoglal.
 Minden kimenő levelet Áron küld el, ez az első kontrollpont.
 
-## Ütemezés
+## Ütemezés és fiókok
 
-Hétköznap (H–P), Europe/Budapest időzóna, két futás:
+Naponta egyszer (a hét minden napján), ~5:00-kor (Europe/Budapest; cron
+`CRON_TZ=Europe/Budapest 57 4 * * *`). Rutin: „Levelezési triázs – Gmail + Outlook (napi,
+ebbe a munkamenetbe)”. A futás abba a Claude Code munkamenetbe érkezik, ahol a modell
+készült; az összefoglaló ott jelenik meg.
 
-| Futás | Időpont | Tartalom |
+Két fiók:
+
+| Fiók | Cím | Jelölés módja |
 |---|---|---|
-| Reggeli | ~5:30 | triázs + piszkozatok + **napi összefoglaló** |
-| Délutáni | ~13:30 | triázs + piszkozatok + rövid frissítés (csak az új tételek) |
+| [G] Gmail | boros.aron.adv@gmail.com | `Triázs/*` címkék (lent) |
+| [O] Outlook / Microsoft 365 | boros.aron@stradamus.hu | `Triázs-*` kategóriák, ugyanazokkal a nevekkel (`Triázs-Ügyfél-mandátum`, `Triázs-Partner`, `Triázs-Admin`, `Triázs-Hírlevél`, `Triázs-Sürgős`, `Triázs-Döntésre-vár`, `Triázs-Piszkozat-kész`, `Triázs-Követés`) |
 
-Megvalósítás: „Levelezési triázs (ebbe a munkamenetbe)” rutin, cron
-`CRON_TZ=Europe/Budapest 28 5,13 * * 1-5`. A futások abba a Claude Code munkamenetbe
-érkeznek, ahol a modell készült, mert annak van Gmail-hozzáférése. Az összefoglaló is
-ott jelenik meg, push/e-mail értesítés nincs.
+„Új” levél = az elmúlt 26 órában érkezett/küldött. Az Outlookban a kategóriára
+`category:"Triázs-Követés"` lekérdezéssel lehet keresni. Mindkét fiókban csak piszkozat
+készülhet (Gmail `create_draft`, Outlook `outlook_create_reply_draft` /
+`outlook_create_reply_all_draft`); küldés, továbbítás, törlés, mozgatás tilos.
 
 ## 1. Triázs (címkézés)
 
@@ -87,7 +92,7 @@ A nyitott követéseket (`label:triázs-követés`) a rutin minden futáskor új
   (vagy az ígért időpont 2+ munkanapja elmúlt), a rutin udvarias emlékeztető-piszkozatot
   írhat. Elküldeni ezt is csak Áron küldi.
 
-Reggel a teljes követési lista jelenik meg, délután csak az új, a lezárult és a P1 tételek.
+A napi összefoglalóban a teljes követési lista megjelenik, fiók-jelöléssel ([G]/[O]).
 
 ## 3. Napi összefoglaló — 2. kontrollpont
 
@@ -114,7 +119,6 @@ P1 / P2 / P3
 ℹ️ Tudnivaló (opcionális, max 3 sor; nem kell rá válasz)
 ```
 
-Üres szekció helyett „—”. A délutáni futás csak az új tételeket sorolja fel, plusz a
-reggel óta még nyitott sürgős tételeket.
+Üres szekció helyett „—”. Minden tétel előtt [G] (Gmail) vagy [O] (Outlook) jelzi a fiókot.
 
 Jelszó, belépési adat és bankszámlaszám nem kerül az összefoglalóba.
