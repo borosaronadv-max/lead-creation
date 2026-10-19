@@ -16,7 +16,7 @@ import sys
 import unicodedata
 import urllib.parse
 
-TITULUSOK = {"dr", "ifj", "id", "prof", "phd", "mba", "jr", "sr", "dipl", "ing", "mr", "mrs", "ms", "mrics", "architect", "msc"}
+TITULUSOK = {"dr", "ifj", "id", "prof", "phd", "mba", "jr", "sr", "dipl", "ing", "mr", "mrs", "ms", "mrics", "architect", "msc", "cfa", "acca"}
 
 
 def nev_kulcs(nev):
@@ -142,7 +142,8 @@ def celcsoport_szerep(beosztas, ceg):
 
 def nev_tisztitas(nev):
     """Megjelenítési név a névjegy-zajtól (titulus, végzettség, "RT HUNGARY") megtisztítva."""
-    szavak = [sz for sz in nev.split()
+    szavak = [sz.strip(",;") for sz in nev.split()]
+    szavak = [sz for sz in szavak
               if sz.lower().strip(".,") not in TITULUSOK and "." not in sz and not sz.islower()]
     if len(szavak) > 3:
         szavak = [sz for sz in szavak if not sz.isupper()] or szavak
@@ -192,8 +193,10 @@ def main():
     latott, talalatok, egyezett = set(), [], 0
     for b in bejegyzesek:
         kulcs = nev_kulcs(b["nev"])
+        # A napló a nyers és a megtisztított nevet is tartalmazhatja ("Agora G." / "Agora").
+        tiszta_kulcs = nev_kulcs(nev_tisztitas(b["nev"]))
         # Egyszavas nevek (pl. "Anyu", "Vízvezeték-szerelő") nem azonosíthatók.
-        if len(kulcs.split()) < 2 or kulcs in latott or kulcs in kihagy:
+        if len(kulcs.split()) < 2 or kulcs in latott or kulcs in kihagy or tiszta_kulcs in kihagy:
             continue
         latott.add(kulcs)
         if a.celcsoport:
