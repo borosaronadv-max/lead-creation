@@ -6,9 +6,11 @@ Minden kimenő levelet Áron küld el, ez az első kontrollpont.
 
 ## Ütemezés és fiókok
 
-Naponta egyszer (a hét minden napján), ~5:00-kor (Europe/Budapest; cron
-`CRON_TZ=Europe/Budapest 57 4 * * *`). Rutin: „Levelezési triázs – Gmail + Outlook (napi,
-ebbe a munkamenetbe)”. A futás abba a Claude Code munkamenetbe érkezik, ahol a modell
+Munkanapokon (H–P) egyszer, ~5:00-kor (Europe/Budapest; cron
+`CRON_TZ=Europe/Budapest 57 4 * * 1-5`). Magyar munkaszüneti napon (pl. 2026-10-23,
+2026-12-24, 2026-12-25) a rutin elindul, de nem dolgoz fel semmit; a következő munkanap
+az egész kimaradt időszakot pótolja. Rutin: „Levelezési triázs – Gmail + Outlook
+(munkanapokon, ebbe a munkamenetbe)”. A futás abba a Claude Code munkamenetbe érkezik, ahol a modell
 készült; az összefoglaló ott jelenik meg.
 
 Két fiók:
@@ -18,10 +20,25 @@ Két fiók:
 | [G] Gmail | boros.aron.adv@gmail.com | `Triázs/*` címkék (lent) |
 | [O] Outlook / Microsoft 365 | boros.aron@stradamus.hu | `Triázs-*` kategóriák, ugyanazokkal a nevekkel (`Triázs-Ügyfél-mandátum`, `Triázs-Partner`, `Triázs-Admin`, `Triázs-Hírlevél`, `Triázs-Sürgős`, `Triázs-Döntésre-vár`, `Triázs-Piszkozat-kész`, `Triázs-Követés`) |
 
-„Új” levél = az elmúlt 26 órában érkezett/küldött. Az Outlookban a kategóriára
+„Új” levél = az előző munkanapi futás óta érkezett/küldött (+2 óra ráhagyás); hétfőn ez
+a pénteki futás óta. Az Outlookban a kategóriára
 `category:"Triázs-Követés"` lekérdezéssel lehet keresni. Mindkét fiókban csak piszkozat
 készülhet (Gmail `create_draft`, Outlook `outlook_create_reply_draft` /
 `outlook_create_reply_all_draft`); küldés, továbbítás, törlés, mozgatás tilos.
+
+
+## Outlook-mappák (témaarchívum)
+
+Áron a fontos céges leveleket kézzel, témánként mappákba teszi a Beérkezett üzenetek alatt;
+a többit törli. A rutin a mappákba **nem mozgat**, de használja őket:
+
+- **Kategorizáláshoz** – a mappaszerkezet a témák térképe:
+  - `ügyfelek/`: Carion · DSTP · lead · oportunity · PC-Trade · Qtics_Tamcert · SZIGÜ
+  - `Stradamus/`: advisory_board · compliance · CRM · ESG_üzletág · iránytű_projekt · könyvvizsgálat · portál · PR
+  - `Magán/`: HVCA · IVSZ · JVSZ_gnioMB · leadek_infok · Nexum · NOAA · PMSZ · Tata MGZRT
+- **Követéshez** – a válaszokat minden mappában keresi, mert egy válasz már iktatva is lehet.
+- **Iktatási javaslathoz** – a napi összefoglalóban „📁 Iktatási javaslat” szekció mondja
+  meg, melyik új levél melyik mappába illik, és hány hírlevél/értesítő törölhető.
 
 ## 1. Triázs (címkézés)
 
