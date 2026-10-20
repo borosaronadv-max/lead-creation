@@ -1,8 +1,9 @@
 # Levelezési modell kontrollpontokkal
 
 A Gmail-postafiók (boros.aron.adv@gmail.com) feldolgozását egy ütemezett Claude-rutin
-végzi. A rutin **soha nem küld levelet**: csak címkéz, piszkozatot ír és összefoglal.
-Minden kimenő levelet Áron küld el, ez az első kontrollpont.
+végzi. A rutin **nem küld levelet**: csak címkéz, piszkozatot ír és összefoglal.
+Minden kimenő levelet Áron küld el, ez az első kontrollpont. Egyetlen kivétel: a kész
+napi összefoglalót a rutin e-mailben elküldi Áron saját céges címére (lásd 3. pont).
 
 ## Ütemezés és fiókok
 
@@ -139,3 +140,12 @@ P1 / P2 / P3
 Üres szekció helyett „—”. Minden tétel előtt [G] (Gmail) vagy [O] (Outlook) jelzi a fiókot.
 
 Jelszó, belépési adat és bankszámlaszám nem kerül az összefoglalóba.
+
+**Küldés e-mailben (az egyetlen engedélyezett küldés):** a futás végén a rutin a teljes
+riportot HTML-törzzsel elküldi `outlook_send_mail`-lel, címzett **kizárólag**
+boros.aron@stradamus.hu (Cc/Bcc nélkül), tárgy:
+`Levelezési triázs – Gmail + Outlook (munkanapokon, ebbe a munkamenetbe) – <ÉÉÉÉ.HH.NN.>`.
+Futásonként egy levél; munkaszüneti napon az egysoros jelzés megy ki. Ha a küldés nem
+sikerül, a munkamenetben visszaadott riport elején ez áll: `⚠️ E-mail küldés sikertelen: <ok>`.
+Minden más küldési, továbbítási és válaszküldési tilalom érvényben marad; a rutin a saját
+összefoglaló-leveleit a triázsból és a követésből kihagyja.
