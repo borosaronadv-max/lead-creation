@@ -62,6 +62,12 @@ now”) új munkamenetet nyithat, amelyben csak az lesz elérhető, amit a rutin
 beállításában megadtak. A csatlakozókat a rutinhoz eszközzel nem lehet
 hozzárendelni, ezt a felületen kell bekapcsolni.
 
+**E-mailes riport:** mindkét felhős rutin a futás végén elküldi a kész riportot a
+`mcp__Microsoft_365__outlook_send_mail` eszközzel, kizárólag a boros.aron@stradamus.hu
+címre (cc/bcc nélkül), tárgy: „LinkedIn rutin – ÉÉÉÉ.HH.NN.” illetve „LinkedIn havi
+rutin – ÉÉÉÉ.HH.NN.”, HTML törzzsel. Ez az egyetlen engedélyezett küldés. Ha nem sikerül,
+a riport elejére „⚠️ E-mail küldés sikertelen: <ok>” kerül.
+
 Ha mégis üres munkakönyvtárban, csatlakozók nélkül indul a futás, az utasítás 0.
 lépése szerint:
 - a repót az `add_repo` eszközzel (owner `borosaronadv-max`, repo `lead-creation`,
