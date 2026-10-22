@@ -1,12 +1,12 @@
 # LinkedIn-rutin
 
-Napi LinkedIn-jelentés, heti kapcsolatépítési lista és havi posztreakció-kimutatás
+Heti (hétfői) LinkedIn-jelentés és kapcsolatépítési lista
 Boros Áron profiljához. A rutin részei:
 
 | Rész | Hol fut | Mit csinál |
 |---|---|---|
-| **A. Felhős rutin** | ütemezve, Claude Code felhős munkamenet (Gmail + Drive) | napi statisztika és jelentés; hétfőn telefonkönyv-egyeztetés, a heti 40 célcsoport-jelölt beírása a munkalapra |
-| **H. Havi rutin** | felhő (kimutatás) + böngésző (adatgyűjtés, meghívók) | posztreakciók kimutatása, reagálók és 2. fokú CEO/CFO/tulajdonosok meghívása |
+| **A. Felhős rutin** | ütemezve, Claude Code felhős munkamenet (Gmail + Drive) | hétfőnként: statisztika és jelentés, telefonkönyv-egyeztetés, a heti 40 célcsoport-jelölt beírása a munkalapra |
+| **H. Havi rutin** | böngésző (adatgyűjtés, meghívók); a felhős havi kimutatás 2026-10-22-től megszűnt | posztreakciók kimutatása, reagálók és 2. fokú CEO/CFO/tulajdonosok meghívása |
 | **B. Böngészős lépés** | Claude Desktop + Claude in Chrome, Áron gépén, kézzel indítva | profilnézők beolvasása, profilok megkeresése, meghívók előkészítése; a **Küldést Áron hagyja jóvá** |
 
 A részek a Drive-on lévő [LinkedIn meghívók](https://docs.google.com/spreadsheets/d/1QSTRW8XBr4myeypzQKXsCWUmojhDj94Te5ChPalk6uM/edit)
@@ -30,20 +30,19 @@ munkalapon keresztül dolgozik együtt (`Linkedin/` mappa, lapok: `Telefonkönyv
 
 | Rész | Mikor | Tartalom |
 |---|---|---|
-| A. Napi jelentés | minden nap ~05:45 (Europe/Budapest) | statisztika, 90 napos dinamika, javasolt aktivitás, a munkalap nyitott tételei |
-| A. Telefonkönyv-egyeztetés | hétfőnként, a napi futás része | 40 célcsoport-jelölt a `Telefonkönyv` lapra (tulajdonos/CEO/CFO, árbevétel-ellenőrzésre) |
+| A. Heti jelentés | hétfőnként ~05:45 (Europe/Budapest) | statisztika, 90 napos dinamika, javasolt aktivitás, a munkalap nyitott tételei |
+| A. Telefonkönyv-egyeztetés | hétfőnként, a heti futás része | 40 célcsoport-jelölt a `Telefonkönyv` lapra (tulajdonos/CEO/CFO, árbevétel-ellenőrzésre) |
 | H. Havi böngészős lépés | minden hónap 1–4. napja, egyszer (kb. 20–30 perc) | előző havi posztok és reagálók, 2. fokú célcsoport-jelöltek a munkalapra |
-| H. Havi kimutatás | minden hónap 5-én ~05:52 (Europe/Budapest) | posztreakciók kimutatása az előző hónapról |
 | B. Böngészős lépés | munkanapokon, amikor Áron a gépnél van (kb. 5–10 perc) | profilnézők, profilkeresés, meghívók előkészítése és jóváhagyásos küldése |
 
-Az A rész: „LinkedIn rutin (ebbe a munkamenetbe)”, cron
-`CRON_TZ=Europe/Budapest 45 5 * * *`. A 6:00 helyett 5:45: az egész órás
+Az A rész: „LinkedIn heti rutin – hétfő (ebbe a munkamenetbe)”, cron
+`CRON_TZ=Europe/Budapest 45 5 * * 1` (2026-10-22-ig naponta futott). A 6:00 helyett 5:45: az egész órás
 időpontokon torlódik az ütemező, így a jelentés 6-ra biztosan kész. A futás abba a
 Claude Code munkamenetbe érkezik, ahol a rutin készült, a jelentés is ott jelenik meg.
 
 ### Futtatási környezet
 
-A felhős rutinok (A és H2) futásához ez kell:
+A felhős rutin (A) futásához ez kell:
 
 | Mi | Érték | Hol állítható |
 |---|---|---|
@@ -53,8 +52,9 @@ A felhős rutinok (A és H2) futásához ez kell:
 
 | Rutin | Trigger ID | Ütemezés |
 |---|---|---|
-| LinkedIn rutin (napi) | `trig_01PcJe1Xg7135ERnG4hSTDi4` | `CRON_TZ=Europe/Budapest 45 5 * * *` |
-| LinkedIn havi rutin | `trig_01W6e1fwyP8VDVjyTnRvePkn` | `CRON_TZ=Europe/Budapest 52 5 5 * *` |
+| LinkedIn heti rutin (hétfő) | `trig_01PcJe1Xg7135ERnG4hSTDi4` | `CRON_TZ=Europe/Budapest 45 5 * * 1` |
+
+A havi felhős rutint (`trig_01W6e1fwyP8VDVjyTnRvePkn`) 2026-10-22-én töröltük.
 
 Az ütemezett futás abba a munkamenetbe érkezik, ahol a rutin készült; ott a repó
 és a csatlakozók rendelkezésre állnak. A felületről kézzel indított futás („Run
@@ -62,10 +62,9 @@ now”) új munkamenetet nyithat, amelyben csak az lesz elérhető, amit a rutin
 beállításában megadtak. A csatlakozókat a rutinhoz eszközzel nem lehet
 hozzárendelni, ezt a felületen kell bekapcsolni.
 
-**E-mailes riport:** mindkét felhős rutin a futás végén elküldi a kész riportot a
+**E-mailes riport:** a felhős rutin a futás végén elküldi a kész riportot a
 `mcp__Microsoft_365__outlook_send_mail` eszközzel, kizárólag a boros.aron@stradamus.hu
-címre (cc/bcc nélkül), tárgy: „LinkedIn rutin – ÉÉÉÉ.HH.NN.” illetve „LinkedIn havi
-rutin – ÉÉÉÉ.HH.NN.”, HTML törzzsel. Ez az egyetlen engedélyezett küldés. Ha nem sikerül,
+címre (cc/bcc nélkül), tárgy: „LinkedIn heti rutin – ÉÉÉÉ.HH.NN.”, HTML törzzsel. Ez az egyetlen engedélyezett küldés. Ha nem sikerül,
 a riport elejére „⚠️ E-mail küldés sikertelen: <ok>” kerül.
 
 Ha mégis üres munkakönyvtárban, csatlakozók nélkül indul a futás, az utasítás 0.
@@ -257,10 +256,10 @@ Megjegyzések:
 - Az 1. fokú (már meglévő) kapcsolatok közül 616 fő tulajdonos/CEO/CFO szerepkörű
   (2026-10-13); nekik nem megy meghívó.
 
-### H2. Havi kimutatás (felhő, minden hónap 5-én)
+### H2. Havi kimutatás (felhő) – megszűnt
 
-„LinkedIn havi rutin (ebbe a munkamenetbe)”, cron `CRON_TZ=Europe/Budapest 52 5 5 * *`.
-A Posztok és Reakciók lap előző havi soraiból, valamint a Gmail heti
+A havi ütemezett futást 2026-10-22-én töröltük; a formátum kérésre, kézzel futtatva
+használható. A Posztok és Reakciók lap előző havi soraiból, valamint a Gmail heti
 megjelenés-összesítőiből:
 
 ```
@@ -282,7 +281,7 @@ Meghívók a reagálóknak: listázva N · elküldve N · elfogadva N
 ```
 
 Ha a Posztok lapon nincs előző havi sor, a kimutatás helyett egy sor: a havi
-böngészős lépés még nem futott. A napi jelentés a hónap 1–4. napján emlékeztet rá.
+böngészős lépés még nem futott. A heti jelentés a hónap első hétfőjén emlékeztet rá.
 
 ## Kezdeti adatok (2026-10-12)
 
